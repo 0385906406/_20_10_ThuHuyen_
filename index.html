@@ -1,0 +1,1590 @@
+<title>Bầu trời của Thu Huyền</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Be+Vietnam+Pro:wght@300;400;500&display=swap">
+<style>
+  /* Layout: full-bleed WebGL sky; words set low over the grass like film subtitles, controls tucked in the top corner */
+  :root {
+    --night: #0a1a38;
+    --sky: #8ccfee;
+    --ice: #eef8ff;
+    --ink: #0f2c55;
+    --glass: rgba(235, 246, 255, 0.16);
+    --line: rgba(235, 246, 255, 0.4);
+    --shadow: rgba(12, 40, 86, 0.55);
+    --script: "Dancing Script", "Segoe Script", "Brush Script MT", cursive;
+    --sans: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; overflow: hidden; background: var(--night); color: var(--ice); font-family: var(--sans); }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  #c:active { cursor: grabbing; }
+
+  /* Intro */
+  #intro {
+    position: fixed; inset: 0; display: grid; place-items: center; padding-inline: 16px;
+    background: linear-gradient(180deg, rgba(70, 150, 225, 0.28), rgba(10, 30, 70, 0.5));
+    -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+    transition: opacity 1.8s ease; z-index: 5;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  .card { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; max-width: 34rem; }
+  .eyebrow { margin: 0; font-size: 13px; letter-spacing: 0.32em; text-transform: uppercase; opacity: 0.85; font-variant-numeric: tabular-nums; }
+  .card h1 {
+    margin: 0; font-family: var(--script); font-weight: 700; line-height: 1.05;
+    font-size: clamp(52px, 14vw, 104px); text-wrap: balance;
+    text-shadow: 0 4px 30px var(--shadow), 0 1px 2px var(--shadow);
+  }
+  .lead { margin: 0; font-weight: 300; font-size: clamp(16px, 4vw, 19px); text-shadow: 0 1px 10px var(--shadow); }
+  #startBtn {
+    margin-top: 14px; border: 0; border-radius: 999px; padding: 15px 38px;
+    background: var(--ice); color: var(--ink); font: 500 16px/1 var(--sans); letter-spacing: 0.06em;
+    box-shadow: 0 0 0 6px rgba(238, 248, 255, 0.18), 0 10px 40px rgba(140, 207, 238, 0.55);
+    cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  #startBtn:hover { transform: translateY(-2px); box-shadow: 0 0 0 9px rgba(238, 248, 255, 0.2), 0 14px 46px rgba(140, 207, 238, 0.7); }
+  #startBtn:focus-visible, .ctl:focus-visible { outline: 2px solid var(--ice); outline-offset: 4px; }
+  .tip { margin: 0; font-size: 13px; font-weight: 300; opacity: 0.8; }
+
+  /* Story lines */
+  #story {
+    position: fixed; left: 16px; right: 16px; bottom: calc(11vh + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    text-align: center; pointer-events: none; transition: opacity 1.4s ease; z-index: 3;
+  }
+  #story.out { opacity: 0; }
+  .line {
+    margin: 0; max-width: 22ch; font-family: var(--script); font-weight: 600; line-height: 1.22;
+    font-size: clamp(30px, 6.6vw, 58px); text-wrap: balance;
+    text-shadow: 0 2px 22px var(--shadow), 0 1px 3px var(--shadow);
+  }
+  .sub { margin: 0; max-width: 40ch; font-weight: 300; font-size: clamp(15px, 3.8vw, 20px); text-shadow: 0 1px 12px var(--shadow); }
+  .w { display: inline-block; white-space: nowrap; }
+  .ch { display: inline-block; opacity: 0; transform: translateY(12px); filter: blur(5px); animation: rise 1s cubic-bezier(.2, .7, .2, 1) forwards; }
+  .sub.fade { opacity: 0; animation: rise 1.6s ease forwards; }
+  @keyframes rise { to { opacity: 1; transform: none; filter: none; } }
+
+  /* Controls & hint */
+  #controls {
+    position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); right: 16px;
+    display: flex; gap: 10px; z-index: 4; transition: opacity 1s ease;
+  }
+  .ctl {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line);
+    background: var(--glass); color: var(--ice); display: grid; place-items: center; cursor: pointer;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .ctl svg { width: 20px; height: 20px; }
+  #hint {
+    position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
+    max-width: calc(100% - 140px); padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--glass); font-size: 13px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: 0; transition: opacity 1s ease; pointer-events: none; z-index: 4;
+  }
+  #hint.show { opacity: 1; }
+  #fallback { position: fixed; inset: 0; display: grid; place-items: center; padding-inline: 16px; text-align: center; background: linear-gradient(#2f86e0, #bfe5fb); color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ch, .sub.fade { animation: none; opacity: 1; transform: none; filter: none; }
+  }
+</style>
+
+<canvas id="c" aria-label="Bầu trời 3D: ngày, hoàng hôn và đêm sao"></canvas>
+
+<div id="intro">
+  <div class="card">
+    <p class="eyebrow">20 · 10 · 2026</p>
+    <h1>Gửi <span data-name>Thu Huyền</span></h1>
+    <p class="lead">Một bầu trời nhỏ, dành riêng cho em.</p>
+    <button id="startBtn" type="button">Mở quà</button>
+    <p class="tip">Nên bật âm thanh và xem trọn khoảng một phút nhé</p>
+  </div>
+</div>
+
+<div id="story" class="out" aria-live="polite"></div>
+<div id="hint"></div>
+
+<div id="controls" hidden>
+  <button class="ctl" id="soundBtn" type="button" aria-label="Tắt âm thanh">
+    <svg id="icoOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    <svg id="icoOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+  </button>
+  <button class="ctl" id="replayBtn" type="button" aria-label="Xem lại từ đầu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+  </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+(() => {
+  /* ============ NỘI DUNG — sửa tên và lời chúc ở đây ============ */
+  const CONFIG = {
+    name: 'Thu Huyền',
+    story: [
+      { at: 2,  dur: 7, text: 'Chúc em một ngày trong trẻo như bầu trời hôm nay' },
+      { at: 11, dur: 8, text: 'Mong những cơn gió dịu dàng nhất luôn mang niềm vui đến bên em' },
+      { at: 21, dur: 8, text: 'Mong em luôn được yêu thương như cách em vẫn yêu thương mọi người' },
+      { at: 31, dur: 9, text: 'Dù nắng có tắt, nụ cười của em vẫn là điều rực rỡ nhất' }
+    ],
+    // phần đêm: hộp quà
+    giftAppear: 'Trời tối rồi… có một món quà nhỏ đang chờ em đó',
+    giftOpen: 'Mở ra xem nhé',
+    lookUp: 'Hãy ngước nhìn lên bầu trời…',
+    finale: { text: 'Chúc mừng 20/10, {name}', sub: 'Luôn xinh đẹp, bình an và thật hạnh phúc nhé 💙' },
+    wishes: [
+      'Chúc em luôn khỏe mạnh và bình an',
+      'Mong mọi điều em ước đều sẽ thành sự thật',
+      'Chúc em luôn được yêu thương thật nhiều',
+      'Cảm ơn em vì đã luôn là chính mình',
+      'Mong mỗi sáng thức dậy em đều mỉm cười',
+      'Em xứng đáng với tất cả những điều dịu dàng nhất',
+      'Mỗi vì sao trên kia là một lời chúc dành cho em'
+    ]
+  };
+  /* =============================================================== */
+
+  document.querySelectorAll('[data-name]').forEach(e => { e.textContent = CONFIG.name; });
+
+  const fail = (msg) => {
+    const d = document.createElement('div');
+    d.id = 'fallback';
+    d.innerHTML = '<div><h1 style="font-family:var(--script);font-size:56px;margin:0">Chúc mừng 20/10, ' + CONFIG.name + '</h1><p>' + msg + '</p></div>';
+    document.body.appendChild(d);
+  };
+  if (!window.THREE) { fail('Không tải được hiệu ứng 3D, em thử mở lại trang nhé.'); return; }
+
+  const canvas = document.getElementById('c');
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  } catch (e) { fail('Trình duyệt này chưa hỗ trợ WebGL.'); return; }
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || Math.min(innerWidth, innerHeight) < 600;
+  const PR = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 1.75);
+  renderer.setPixelRatio(PR);
+  renderer.setClearColor(0x0a1a38);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 6000);
+  camera.rotation.order = 'YXZ';
+
+  /* ---------- Terrain ---------- */
+  function groundH(x, z) {
+    let h = Math.sin(x * 0.035) * 1.6 + Math.cos(z * 0.03 + 1.3) * 1.4 + Math.sin((x + z) * 0.07) * 0.5;
+    const r2 = x * x + z * z;
+    h += 4.0 * Math.exp(-r2 / (2 * 30 * 30));
+    h -= Math.max(0, -z) * 0.04;
+    return h;
+  }
+  const CAM = new THREE.Vector3(0, groundH(0, 0) + 1.5, 0);
+  camera.position.copy(CAM);
+  const CAM0 = CAM.clone();                                  // where the viewer starts; CAM itself moves when walking
+  const BOX = new THREE.Vector3(0, groundH(0, -7), -7);      // gift box on the grass ahead
+  const STAND = new THREE.Vector3(0, 0, -5.3);               // where the viewer stops in front of it
+
+  /* ---------- Shared uniforms ---------- */
+  const C = () => new THREE.Color();
+  const U = {
+    uTime: { value: 0 }, uSunDir: { value: new THREE.Vector3(0, 1, 0) },
+    uZen: { value: C() }, uHor: { value: C() }, uSun: { value: C() }, uMount: { value: C() }, uFog: { value: C() },
+    uLit: { value: C() }, uShade: { value: C() }, uSunLight: { value: C() }, uAmb: { value: C() },
+    uNight: { value: 0 }, uWarm: { value: 0 }, uCover: { value: 0.55 },
+    uCam: { value: CAM }, uScale: { value: 1 }, uPR: { value: PR },
+    uMoonDir: { value: new THREE.Vector3() }, uLightDir: { value: new THREE.Vector3(0, 1, 0) }, uLight: { value: C() },
+    uGiftPos: { value: BOX.clone().add(new THREE.Vector3(0, 0.5, 0)) }, uGiftCol: { value: C() }
+  };
+  { const az = 0.75, el = 0.36; U.uMoonDir.value.set(-Math.sin(az) * Math.cos(el), Math.sin(el), -Math.cos(az) * Math.cos(el)); }
+
+  const NOISE = `
+    float hash(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+    float noise(vec2 p){ vec2 i=floor(p); vec2 f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),u.x), mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),u.x), u.y); }
+    float fbm(vec2 p){ float v=0.0; float a=0.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);
+      for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=0.5; } return v; }
+  `;
+  const FOG = `
+    uniform vec3 uFog; uniform vec3 uCam;
+    vec3 applyFog(vec3 col, vec3 w){
+      float dist = length(w - uCam);
+      float f = 1.0 - exp(-pow(dist/230.0, 1.6));
+      f = max(f, smoothstep(280.0, 390.0, dist));
+      return mix(col, uFog, f);
+    }
+    uniform vec3 uGiftPos; uniform vec3 uGiftCol;
+    vec3 giftLight(vec3 w){ vec3 d = w - uGiftPos; return uGiftCol / (1.0 + dot(d, d)*2.2); }
+  `;
+  const WIND = `
+    float windSway(vec2 wp, float t, float r){
+      float g = sin(wp.x*0.15 - t*1.3)*0.5 + sin(wp.x*0.07 + wp.y*0.11 - t*0.7)*0.5;
+      return (g*0.5+0.6)*0.35 + sin(t*3.0 + r*6.2831)*0.05;
+    }
+  `;
+  const DOME_VS = `varying vec3 vDir; void main(){ vDir = position; vec4 p = projectionMatrix*modelViewMatrix*vec4(position,1.0); gl_Position = p.xyww; }`;
+
+  /* ---------- Sky dome ---------- */
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(2500, 64, 32), new THREE.ShaderMaterial({
+    uniforms: U, side: THREE.BackSide, depthWrite: false,
+    vertexShader: DOME_VS,
+    fragmentShader: `
+      uniform vec3 uZen, uHor, uSun, uSunDir, uMount, uFog, uMoonDir; uniform float uNight, uWarm;
+      varying vec3 vDir;
+      ${NOISE}
+      float ridge(vec2 p){
+        float v = 0.0, a = 0.5;
+        for (int i = 0; i < 6; i++) { float n = 1.0 - abs(noise(p)*2.0 - 1.0); v += a*n*n; p = p*2.03 + vec2(1.7, 9.2); a *= 0.5; }
+        return v;
+      }
+      void main(){
+        vec3 d = normalize(vDir); float y = d.y; float h = clamp(y, 0.0, 1.0);
+        vec3 col = mix(uHor, uZen, pow(h, 0.5));
+        float sd = max(dot(d, uSunDir), 0.0);
+        float vis = smoothstep(-0.3, 0.0, uSunDir.y);
+        col += uSun * (pow(sd, 6.0)*0.16 + pow(sd, 90.0)*0.22 + pow(sd, 2500.0)*1.1) * vis;
+        vec2 dh = normalize(d.xz + 1e-5); vec2 sh = normalize(uSunDir.xz + 1e-5);
+        float az = max(dot(dh, sh), 0.0);
+        col += uSun * uWarm * 0.5 * pow(az, 3.0) * exp(-h*7.0);
+        float disc = smoothstep(0.99984, 0.99991, sd) * smoothstep(-0.06, 0.0, uSunDir.y);
+        col = mix(col, vec3(1.0, 0.97, 0.9)*0.6 + uSun*0.6, disc);
+        if (uNight > 0.001) {
+          vec3 n = normalize(vec3(0.45, 0.35, 0.82));
+          float b = dot(d, n); float band = exp(-b*b*22.0);
+          vec2 q = vec2(d.x*3.0 + d.z*2.1, d.y*3.6 - d.z*1.7);
+          float m = fbm(q*2.0) * fbm(q*5.0 + 3.0);
+          float dust = smoothstep(0.35, 0.6, fbm(q*3.5 + 9.0));
+          col += vec3(0.5, 0.58, 0.95) * band * m * 1.6 * uNight * smoothstep(0.02, 0.35, y) * (1.0 - dust*0.6);
+        }
+        if (uNight > 0.001) {
+          float md = dot(d, uMoonDir);
+          col += vec3(0.5, 0.62, 0.9) * (pow(max(md, 0.0), 60.0)*0.06 + pow(max(md, 0.0), 900.0)*0.25 + pow(max(md, 0.0), 6000.0)*0.4) * uNight;
+          float MR = 0.0095;
+          vec3 mx = normalize(cross(vec3(0.0, 1.0, 0.0), uMoonDir)); vec3 my = cross(uMoonDir, mx);
+          vec2 q = vec2(dot(d, mx), dot(d, my)) / MR;
+          float r = length(q);
+          if (md > 0.0 && r < 1.1) {
+            float maria = fbm(q*2.2 + 3.0); float crater = noise(q*9.0);
+            vec3 mc = vec3(0.97, 0.96, 0.9) * (0.7 + 0.3*smoothstep(0.35, 0.65, maria)) * (0.9 + 0.1*crater);
+            mc *= mix(0.72, 1.0, sqrt(max(0.0, 1.0 - r*r)));
+            col = mix(col, mc*1.2, smoothstep(1.0, 0.93, r) * uNight);
+          }
+        }
+        vec2 ca = normalize(d.xz + 1e-5);
+        float h1 = 0.012 + 0.085*ridge(ca*3.0 + 7.3);
+        float hm = 0.006 + 0.05*ridge(ca*5.5 + 3.1);
+        float h2 = 0.003 + 0.032*fbm(ca*9.0 + 1.7);
+        vec3 farC = mix(uFog, uMount, 0.42) + uSun*pow(sd, 6.0)*0.12*vis;
+        vec3 midC = mix(uFog, uMount, 0.62);
+        vec3 nearC = mix(uFog, uMount, 0.85);
+        float tex = fbm(vec2(atan(d.x, -d.z)*60.0, y*220.0));
+        farC = mix(farC, uFog, smoothstep(h1, h1 - 0.06, y)*0.55) * (0.95 + tex*0.1);
+        midC = mix(midC, uFog, smoothstep(hm, hm - 0.04, y)*0.5) * (0.92 + tex*0.14);
+        nearC *= 0.9 + tex*0.18;
+        col = mix(col, farC, smoothstep(h1 + 0.0012, h1 - 0.0012, y));
+        col = mix(col, midC, smoothstep(hm + 0.0012, hm - 0.0012, y));
+        col = mix(col, nearC, smoothstep(h2 + 0.0012, h2 - 0.0012, y));
+        col = mix(col, uFog, smoothstep(0.0, -0.06, y));
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  }));
+  sky.renderOrder = -2; sky.frustumCulled = false;
+  scene.add(sky);
+
+  /* ---------- Clouds dome ---------- */
+  const clouds = new THREE.Mesh(new THREE.SphereGeometry(2400, 64, 32), new THREE.ShaderMaterial({
+    uniforms: U, side: THREE.BackSide, transparent: true, depthWrite: false,
+    vertexShader: DOME_VS,
+    fragmentShader: `
+      uniform float uTime, uCover, uNight; uniform vec3 uLit, uShade, uSun, uSunDir, uHor;
+      varying vec3 vDir;
+      ${NOISE}
+      float dens(vec2 uv, vec2 w){
+        float v = fbm(uv*1.1 + w)*0.8 + fbm(uv*3.1 - w*1.6 + 3.7)*0.3;
+        float lo = 0.95 - uCover;
+        return smoothstep(lo, lo + 0.3, v);
+      }
+      void main(){
+        vec3 d = normalize(vDir);
+        if (d.y < 0.03) discard;
+        vec2 uv = d.xz / (d.y + 0.12);
+        vec2 w = vec2(1.0, 0.35) * uTime * 0.018;
+        vec2 s2 = normalize(uSunDir.xz + 1e-4) * 0.07;
+        float a = dens(uv, w);
+        if (a < 0.003) discard;
+        float b = dens(uv + s2, w);
+        float lit = clamp(0.62 + (a - b)*1.9, 0.0, 1.0);
+        vec3 col = mix(uShade, uLit, lit * (1.0 - a*0.3));
+        float sd = max(dot(d, uSunDir), 0.0);
+        float vis = smoothstep(-0.25, 0.0, uSunDir.y);
+        col += uSun * pow(sd, 12.0) * (1.0 - a) * 0.4 * vis;
+        col = mix(col, uHor, (1.0 - smoothstep(0.0, 0.35, d.y)) * 0.45);
+        float alpha = a * smoothstep(0.03, 0.2, d.y) * (1.0 - uNight*0.4);
+        gl_FragColor = vec4(col, alpha);
+      }`
+  }));
+  clouds.renderOrder = 4; clouds.frustumCulled = false;
+  scene.add(clouds);
+
+  /* ---------- Shared GLSL: wind gusts rolling across the field, drifting cloud shadows ---------- */
+  const GUST = `
+    float gust(vec2 xz, float t){
+      vec2 wd = vec2(0.94, 0.33);
+      vec2 q = xz*0.045 - wd*t*0.22;
+      float g = noise(q)*0.65 + noise(q*2.7 + 3.0)*0.35;
+      return smoothstep(0.25, 0.85, g);
+    }
+  `;
+  const SHADOW = `
+    uniform float uCover;
+    float cloudShadow(vec2 xz, float t){
+      vec2 q = xz*0.0045 - vec2(0.94, 0.33)*t*0.012;
+      float v = noise(q)*0.55 + noise(q*2.3 + 5.1)*0.3 + noise(q*5.1 + 1.7)*0.15;
+      float lo = 0.95 - uCover;
+      return 1.0 - 0.55*smoothstep(lo, lo + 0.25, v);
+    }
+  `;
+
+  /* ---------- Ground ---------- */
+  const gGeo = new THREE.PlaneGeometry(800, 800, 256, 256);
+  gGeo.rotateX(-Math.PI / 2);
+  { const p = gGeo.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, groundH(p.getX(i), p.getZ(i))); }
+  gGeo.computeVertexNormals();
+  const ground = new THREE.Mesh(gGeo, new THREE.ShaderMaterial({
+    uniforms: U,
+    vertexShader: `varying vec3 vW; varying vec3 vN;
+      void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW = w.xyz; vN = normal; gl_Position = projectionMatrix*viewMatrix*w; }`,
+    fragmentShader: `
+      uniform vec3 uLightDir, uLight, uAmb; uniform float uTime;
+      varying vec3 vW; varying vec3 vN;
+      ${NOISE} ${FOG} ${SHADOW}
+      void main(){
+        float n = fbm(vW.xz*0.05); float n2 = noise(vW.xz*0.8); float n3 = noise(vW.xz*3.0);
+        vec3 base = mix(vec3(0.17, 0.30, 0.09), vec3(0.34, 0.48, 0.17), n);
+        base = mix(base, vec3(0.42, 0.41, 0.21), smoothstep(0.55, 0.8, fbm(vW.xz*0.12 + 4.0))*0.5);
+        base *= 0.8 + 0.25*n2 + 0.1*n3;
+        float d = length(vW.xz - uCam.xz);
+        base *= mix(0.45, 1.0, smoothstep(20.0, 70.0, d));
+        vec3 N = normalize(vN);
+        float sh = cloudShadow(vW.xz, uTime);
+        vec3 col = base * (uAmb*0.9 + uLight*max(dot(N, uLightDir), 0.0)*sh + giftLight(vW)*1.2);
+        gl_FragColor = vec4(applyFog(col, vW), 1.0);
+      }`
+  }));
+  scene.add(ground);
+
+  /* ---------- Grass: folded, curved blades in tufts, lit with wrap diffuse, sheen and back-light ---------- */
+  {
+    const SEG = isMobile ? 5 : 7, pos = [], idx = [];
+    for (let i = 0; i < SEG; i++) { const y = i / SEG; pos.push(-1, y, 0, 0, y, 0, 1, y, 0); }
+    pos.push(0, 1, 0);
+    for (let i = 0; i < SEG - 1; i++) {
+      const a = i * 3, b = a + 3;
+      idx.push(a, b, a + 1, a + 1, b, b + 1, a + 1, b + 1, a + 2, a + 2, b + 1, b + 2);
+    }
+    const last = (SEG - 1) * 3, tip = SEG * 3;
+    idx.push(last, tip, last + 1, last + 1, tip, last + 2);
+
+    const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+    const N = isMobile ? 55000 : 160000, R = isMobile ? 55 : 70;
+    const clumps = [];
+    for (let c = 0; c < N / 35; c++) {
+      const r = 0.8 + (R - 0.8) * Math.random(), a = Math.random() * Math.PI * 2;
+      const dry = Math.random() < 0.14;
+      clumps.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, ang: Math.random() * Math.PI, hs: 0.7 + Math.random() * 0.7,
+        tint: dry ? 0.55 + Math.random() * 0.45 : Math.random() * 0.18, lean: 0.12 + Math.random() * 0.4 });
+    }
+    const off = new Float32Array(N * 3), par = new Float32Array(N * 4), par2 = new Float32Array(N * 2);
+    for (let i = 0; i < N; i++) {
+      let x, z, c = null;
+      if (Math.random() < 0.72) {
+        c = clumps[Math.floor(Math.random() * clumps.length)];
+        x = c.x + gauss() * 0.32; z = c.z + gauss() * 0.32;
+      } else {
+        const r = 0.7 + (R - 0.7) * Math.random(), a = Math.random() * Math.PI * 2;
+        x = Math.cos(a) * r; z = Math.sin(a) * r;
+      }
+      const r = Math.hypot(x, z);
+      if (r < 0.6) { x *= 0.6 / Math.max(r, 0.01); z *= 0.6 / Math.max(r, 0.01); }
+      // leave room for the gift box and press the grass down around it
+      let bd = Math.hypot(x - BOX.x, z - BOX.z);
+      if (bd < 0.4) { const k = 0.4 / Math.max(bd, 0.01); x = BOX.x + (x - BOX.x) * k; z = BOX.z + (z - BOX.z) * k; bd = 0.4; }
+      const near = 0.45 + 0.55 * Math.min(1, Math.max(0, (bd - 0.4) / 1.1));
+      const fade = 1 - Math.max(0, (r - R * 0.55) / (R * 0.45));
+      off[i * 3] = x; off[i * 3 + 1] = groundH(x, z) - 0.02; off[i * 3 + 2] = z;
+      par[i * 4] = c ? c.ang + (Math.random() - 0.5) * 1.4 : Math.random() * Math.PI;
+      par[i * 4 + 1] = (0.22 + Math.random() * 0.5) * (c ? c.hs : 0.85) * (0.2 + 0.8 * Math.max(fade, 0)) * near;
+      par[i * 4 + 2] = (0.011 + Math.random() * 0.012) * (1 + r * 0.045);
+      par[i * 4 + 3] = Math.random();
+      par2[i * 2] = c ? c.lean + (Math.random() - 0.5) * 0.2 : 0.1 + Math.random() * 0.5;
+      par2[i * 2 + 1] = c ? c.tint + Math.random() * 0.12 : Math.random() * 0.25;
+    }
+    const g = new THREE.InstancedBufferGeometry();
+    g.setIndex(idx);
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('aOffset', new THREE.InstancedBufferAttribute(off, 3));
+    g.setAttribute('aParams', new THREE.InstancedBufferAttribute(par, 4));
+    g.setAttribute('aParams2', new THREE.InstancedBufferAttribute(par2, 2));
+    g.instanceCount = N;
+    const grass = new THREE.Mesh(g, new THREE.ShaderMaterial({
+      uniforms: U, side: THREE.DoubleSide,
+      vertexShader: `
+        attribute vec3 aOffset; attribute vec4 aParams; attribute vec2 aParams2;
+        uniform float uTime;
+        varying float vH; varying float vTint; varying float vR; varying float vSh; varying vec3 vW; varying vec3 vN;
+        ${NOISE} ${GUST} ${SHADOW}
+        void main(){
+          float t = position.y, side = position.x;
+          float h = aParams.y, w = aParams.z * (1.0 - pow(t, 1.4));
+          vec2 F = vec2(cos(aParams.x), sin(aParams.x));
+          vec2 wd = vec2(0.94, 0.33);
+          float g = gust(aOffset.xz, uTime);
+          float flutter = sin(uTime*(3.5 + aParams.w*3.0) + aParams.w*31.0 + aOffset.x*0.7) * (0.05 + 0.08*g);
+          vec2 bendV = F*aParams2.x + wd*(0.12 + g*0.85 + flutter);
+          float amt = length(bendV); vec2 L = bendV / max(amt, 1e-4); amt = min(amt, 1.3);
+          float bx = h*amt*t*t*0.5;
+          float by = h*t*(1.0 - amt*amt*t*t*0.15);
+          vec3 R = vec3(-F.y, 0.0, F.x), Fv = vec3(F.x, 0.0, F.y);
+          vec3 p = aOffset + R*side*w + vec3(L.x, 0.0, L.y)*bx + vec3(0.0, by, 0.0);
+          p += Fv*(1.0 - abs(side))*w*0.4;
+          vec3 T = normalize(vec3(L.x*amt*t, 1.0 - amt*amt*t*t*0.45, L.y*amt*t));
+          vN = normalize(normalize(cross(R, T)) + R*side*0.5);
+          vH = t; vTint = aParams2.y; vR = aParams.w; vW = p;
+          vSh = cloudShadow(aOffset.xz, uTime);
+          gl_Position = projectionMatrix*viewMatrix*vec4(p, 1.0);
+        }`,
+      fragmentShader: `
+        uniform vec3 uLightDir, uLight, uAmb;
+        varying float vH; varying float vTint; varying float vR; varying float vSh; varying vec3 vW; varying vec3 vN;
+        ${FOG}
+        void main(){
+          vec3 V = normalize(uCam - vW);
+          vec3 N = normalize(vN); if (dot(N, V) < 0.0) N = -N;
+          vec3 col = mix(vec3(0.04, 0.10, 0.04), vec3(0.17, 0.36, 0.09), smoothstep(0.0, 0.45, vH));
+          col = mix(col, vec3(0.46, 0.62, 0.20), smoothstep(0.45, 1.0, vH));
+          col *= 0.82 + vR*0.36;
+          col = mix(col, mix(vec3(0.40, 0.38, 0.17), vec3(0.74, 0.67, 0.38), vH), clamp(vTint, 0.0, 1.0)*0.75);
+          col = mix(col, col*vec3(0.85, 1.0, 1.1), step(0.72, vR)*0.5);
+          float ao = mix(0.22, 1.0, smoothstep(0.0, 0.75, vH));
+          float diff = clamp(dot(N, uLightDir)*0.5 + 0.5, 0.0, 1.0);
+          float spec = pow(max(dot(N, normalize(uLightDir + V)), 0.0), 48.0) * 0.4 * smoothstep(0.2, 0.9, vH);
+          float trans = pow(max(dot(-V, uLightDir), 0.0), 5.0) * smoothstep(0.1, 1.0, vH);
+          vec3 sun = uLight * vSh;
+          vec3 lit = col*(uAmb*ao*0.95 + sun*diff*ao*0.9)
+                   + sun*spec*vec3(1.0, 0.98, 0.9)
+                   + sun*col*trans*vec3(1.6, 2.0, 0.9)
+                   + col*giftLight(vW)*1.6;
+          gl_FragColor = vec4(applyFog(lit, vW), 1.0);
+        }`
+    }));
+    grass.frustumCulled = false;
+    scene.add(grass);
+  }
+
+  /* ---------- Wildflowers: real 3D stems, cupped petals and a centre, growing in patches ---------- */
+  {
+    const pos = [], part = [], rad = [], idx = [];
+    const add = (x, y, z, pt, rd) => { pos.push(x, y, z); part.push(pt); rad.push(rd); return part.length - 1; };
+    const S = 4;
+    for (let k = 0; k <= S; k++) { add(-1, k / S, 0, 0, 0); add(1, k / S, 0, 0, 0); }
+    for (let k = 0; k < S; k++) { const a = 2 * k; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+    const NP = 5;
+    for (let k = 0; k < NP; k++) {
+      const f = k * Math.PI * 2 / NP;
+      const P = (r, da) => add(Math.cos(f + da) * r, r * r * 0.32, Math.sin(f + da) * r, 1, r);
+      const b = P(0.12, 0), l = P(0.55, -0.42), tl = P(0.9, -0.22), tp = P(1.0, 0), tr = P(0.9, 0.22), rr = P(0.55, 0.42);
+      idx.push(b, l, tl, b, tl, tp, b, tp, tr, b, tr, rr);
+    }
+    const cc = add(0, 0.16, 0, 2, 0), ring = [];
+    for (let k = 0; k < 7; k++) { const f = k * Math.PI * 2 / 7; ring.push(add(Math.cos(f) * 0.24, 0.1, Math.sin(f) * 0.24, 2, 0)); }
+    for (let k = 0; k < 7; k++) idx.push(cc, ring[k], ring[(k + 1) % 7]);
+
+    const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+    const pal = ['#4f86e8', '#7fb8ff', '#b8dcff', '#f5f8ff', '#9d9cf0', '#f5b8c8'].map(c => new THREE.Color(c));
+    const N = isMobile ? 2000 : 4500, PATCH = isMobile ? 70 : 140;
+    const patches = [];
+    for (let i = 0; i < PATCH; i++) {
+      const r = 2 + 34 * Math.pow(Math.random(), 0.8), a = Math.random() * Math.PI * 2;
+      const roll = Math.random();
+      patches.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, c: pal[roll < 0.05 ? 5 : roll < 0.3 ? 3 : Math.floor(Math.random() * 3)], s: 0.6 + Math.random() * 1.6 });
+    }
+    const off = new Float32Array(N * 3), prm = new Float32Array(N * 4), col = new Float32Array(N * 3), tilt = new Float32Array(N);
+    const tmpC = new THREE.Color();
+    for (let i = 0; i < N; i++) {
+      const p = patches[Math.floor(Math.random() * PATCH)];
+      let x = p.x + gauss() * p.s, z = p.z + gauss() * p.s;
+      const bd = Math.hypot(x - BOX.x, z - BOX.z);
+      if (bd < 0.6) { const k = 0.6 / Math.max(bd, 0.01); x = BOX.x + (x - BOX.x) * k; z = BOX.z + (z - BOX.z) * k; }
+      off[i * 3] = x; off[i * 3 + 1] = groundH(x, z) - 0.02; off[i * 3 + 2] = z;
+      prm[i * 4] = Math.random() * Math.PI * 2;
+      prm[i * 4 + 1] = 0.22 + Math.random() * 0.3;
+      prm[i * 4 + 2] = 0.034 + Math.random() * 0.026;
+      prm[i * 4 + 3] = Math.random();
+      tmpC.copy(p.c).offsetHSL((Math.random() - 0.5) * 0.03, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.08);
+      col[i * 3] = tmpC.r; col[i * 3 + 1] = tmpC.g; col[i * 3 + 2] = tmpC.b;
+      tilt[i] = 0.1 + Math.random() * 0.45;
+    }
+    const g = new THREE.InstancedBufferGeometry();
+    g.setIndex(idx);
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('aPart', new THREE.Float32BufferAttribute(part, 1));
+    g.setAttribute('aRad', new THREE.Float32BufferAttribute(rad, 1));
+    g.setAttribute('aOffset', new THREE.InstancedBufferAttribute(off, 3));
+    g.setAttribute('aP', new THREE.InstancedBufferAttribute(prm, 4));
+    g.setAttribute('aColor', new THREE.InstancedBufferAttribute(col, 3));
+    g.setAttribute('aTilt', new THREE.InstancedBufferAttribute(tilt, 1));
+    g.instanceCount = N;
+    const flowers = new THREE.Mesh(g, new THREE.ShaderMaterial({
+      uniforms: U, side: THREE.DoubleSide,
+      vertexShader: `
+        attribute float aPart; attribute float aRad; attribute vec3 aOffset; attribute vec4 aP; attribute vec3 aColor; attribute float aTilt;
+        uniform float uTime;
+        varying vec3 vC; varying float vPart; varying float vRad; varying float vSh; varying vec3 vW; varying vec3 vN;
+        ${NOISE} ${GUST} ${SHADOW}
+        void main(){
+          float h = aP.y;
+          vec3 wd = vec3(0.94, 0.0, 0.33);
+          float g = gust(aOffset.xz, uTime);
+          float amt = 0.08 + g*0.55 + sin(uTime*(2.5 + aP.w*2.0) + aP.w*20.0)*(0.05 + 0.08*g);
+          vec3 p; vec3 N;
+          if (aPart < 0.5) {
+            float t = position.y;
+            vec3 R = vec3(-sin(aP.x), 0.0, cos(aP.x));
+            p = aOffset + R*position.x*0.0028 + wd*h*amt*t*t*0.5 + vec3(0.0, h*t*(1.0 - amt*amt*t*t*0.15), 0.0);
+            N = vec3(cos(aP.x), 0.0, sin(aP.x));
+          } else {
+            vec3 top = aOffset + wd*h*amt*0.5 + vec3(0.0, h*(1.0 - amt*amt*0.15), 0.0);
+            vec3 face = vec3(cos(aP.x*3.0), 0.0, sin(aP.x*3.0));
+            vec3 up = normalize(vec3(0.0, 1.0, 0.0) + wd*amt*0.9 + face*aTilt);
+            vec3 X = normalize(cross(up, vec3(0.0, 0.0, 1.0)));
+            vec3 Z = cross(X, up);
+            float c = cos(aP.x), s = sin(aP.x);
+            vec3 lp = vec3(position.x*c - position.z*s, position.y, position.x*s + position.z*c) * aP.z;
+            p = top + X*lp.x + up*lp.y + Z*lp.z;
+            N = up;
+          }
+          vC = aColor; vPart = aPart; vRad = aRad; vW = p; vN = N;
+          vSh = cloudShadow(aOffset.xz, uTime);
+          gl_Position = projectionMatrix*viewMatrix*vec4(p, 1.0);
+        }`,
+      fragmentShader: `
+        uniform vec3 uLightDir, uLight, uAmb;
+        varying vec3 vC; varying float vPart; varying float vRad; varying float vSh; varying vec3 vW; varying vec3 vN;
+        ${FOG}
+        void main(){
+          vec3 V = normalize(uCam - vW);
+          vec3 N = normalize(vN); if (dot(N, V) < 0.0) N = -N;
+          vec3 col; float transK;
+          if (vPart < 0.5) { col = vec3(0.15, 0.30, 0.08); transK = 0.6; }
+          else if (vPart < 1.5) {
+            col = mix(vC*0.62, mix(vC, vec3(1.0), 0.12), smoothstep(0.15, 0.95, vRad));
+            col = mix(vec3(0.98, 0.96, 0.85), col, smoothstep(0.16, 0.3, vRad));
+            transK = 1.4;
+          } else { col = vec3(0.95, 0.76, 0.22); transK = 0.4; }
+          float diff = clamp(dot(N, uLightDir)*0.6 + 0.4, 0.0, 1.0);
+          float trans = pow(max(dot(-V, uLightDir), 0.0), 4.0) * transK;
+          vec3 sun = uLight * vSh;
+          vec3 lit = col*(uAmb*1.05 + sun*diff*0.95 + giftLight(vW)*1.8) + sun*col*trans;
+          gl_FragColor = vec4(applyFog(lit, vW), 1.0);
+        }`
+    }));
+    flowers.frustumCulled = false;
+    scene.add(flowers);
+  }
+
+  /* ---------- Floating motes (pollen by day, fireflies by night) ---------- */
+  {
+    const N = isMobile ? 160 : 280;
+    const P = new Float32Array(N * 3), rnd = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      const x = (Math.random() - 0.5) * 60, z = (Math.random() - 0.5) * 60;
+      P[i * 3] = x; P[i * 3 + 1] = groundH(x, z) + 0.6 + Math.random() * 5; P[i * 3 + 2] = z;
+      rnd[i] = Math.random();
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(P, 3));
+    geo.setAttribute('aRand', new THREE.BufferAttribute(rnd, 1));
+    const motes = new THREE.Points(geo, new THREE.ShaderMaterial({
+      uniforms: U, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      vertexShader: `
+        attribute float aRand; uniform float uTime, uNight, uScale; uniform vec3 uCam;
+        varying float vA;
+        void main(){
+          vec3 p = position;
+          p.x += uTime*(0.8 + aRand*0.6);
+          p.y += sin(uTime*0.5 + aRand*20.0)*0.6;
+          p.z += cos(uTime*0.4 + aRand*13.0)*0.6;
+          p.x = mod(p.x - uCam.x + 30.0, 60.0) - 30.0 + uCam.x;
+          float blink = 0.35 + 0.65*pow(0.5 + 0.5*sin(uTime*(1.2 + aRand*1.5) + aRand*40.0), 3.0);
+          vA = mix(0.5, blink, uNight) * smoothstep(30.0, 22.0, abs(p.x - uCam.x));
+          vec4 mv = viewMatrix*vec4(p, 1.0);
+          gl_Position = projectionMatrix*mv;
+          gl_PointSize = clamp(mix(0.05, 0.16, uNight)*uScale / -mv.z, 1.0, 26.0);
+        }`,
+      fragmentShader: `
+        uniform float uNight; varying float vA;
+        void main(){
+          float r = length(gl_PointCoord - 0.5);
+          float g = smoothstep(0.5, 0.0, r); g = g*g;
+          vec3 c = mix(vec3(1.0), vec3(0.55, 0.85, 1.0), uNight);
+          gl_FragColor = vec4(c, g*vA*mix(0.6, 1.0, uNight));
+        }`
+    }));
+    motes.renderOrder = 5; motes.frustumCulled = false;
+    scene.add(motes);
+  }
+
+  /* ---------- Background stars ---------- */
+  const STAR_VS_COMMON = `
+    float twinkle(float r){ return 0.6 + 0.4*sin(uTime*(1.0 + r*3.0) + r*40.0); }
+  `;
+  const STAR_FS = `
+    varying float vA; varying vec3 vC;
+    void main(){
+      float r = length(gl_PointCoord - 0.5);
+      float g = pow(smoothstep(0.5, 0.0, r), 2.2) + smoothstep(0.12, 0.0, r)*0.8;
+      gl_FragColor = vec4(vC, g*vA);
+    }`;
+  {
+    const N = isMobile ? 1800 : 2800;
+    const P = new Float32Array(N * 3), sz = new Float32Array(N), rnd = new Float32Array(N), col = new Float32Array(N * 3);
+    const tints = [[1, 1, 1], [0.8, 0.9, 1], [0.7, 0.82, 1], [1, 0.95, 0.85]];
+    for (let i = 0; i < N; i++) {
+      const y = Math.random(), ph = Math.random() * Math.PI * 2, r = Math.sqrt(1 - y * y);
+      P[i * 3] = Math.cos(ph) * r * 1500; P[i * 3 + 1] = y * 1500; P[i * 3 + 2] = Math.sin(ph) * r * 1500;
+      sz[i] = 0.9 + Math.pow(Math.random(), 6) * 3.4; rnd[i] = Math.random();
+      const t = tints[Math.floor(Math.random() * tints.length)];
+      col[i * 3] = t[0]; col[i * 3 + 1] = t[1]; col[i * 3 + 2] = t[2];
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(P, 3));
+    geo.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
+    geo.setAttribute('aRand', new THREE.BufferAttribute(rnd, 1));
+    geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
+    const stars = new THREE.Points(geo, new THREE.ShaderMaterial({
+      uniforms: U, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      vertexShader: `
+        attribute float aSize; attribute float aRand; attribute vec3 aColor;
+        uniform float uTime, uNight, uPR;
+        varying float vA; varying vec3 vC;
+        ${STAR_VS_COMMON}
+        void main(){
+          vec3 d = normalize(position);
+          vA = smoothstep(0.04, 0.2, d.y) * uNight * twinkle(aRand);
+          vC = aColor;
+          gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0);
+          gl_PointSize = aSize*uPR*1.6;
+        }`,
+      fragmentShader: STAR_FS
+    }));
+    stars.renderOrder = 1; stars.frustumCulled = false; stars.position.copy(CAM);
+    scene.add(stars);
+  }
+
+  /* ---------- Name constellation ---------- */
+  const N_TEXT = isMobile ? 950 : 1400, N_HEART = 120, NN = N_TEXT + N_HEART;
+  const NAME_EL = 0.6, NAME_D = 900;
+  const local = new Float32Array(NN * 2);
+  const nameGeo = new THREE.BufferGeometry();
+  const nStart = new Float32Array(NN * 3), nTarget = new Float32Array(NN * 3);
+  const nDelay = new Float32Array(NN), nSize = new Float32Array(NN), nRand = new Float32Array(NN), nCol = new Float32Array(NN * 3);
+  for (let i = 0; i < NN; i++) {
+    // every star starts inside the open gift box (positions are relative to the starting viewpoint)
+    nStart[i * 3] = BOX.x - CAM0.x + (Math.random() - 0.5) * 0.3;
+    nStart[i * 3 + 1] = BOX.y - CAM0.y + 0.35 + Math.random() * 0.1;
+    nStart[i * 3 + 2] = BOX.z - CAM0.z + (Math.random() - 0.5) * 0.3;
+    nRand[i] = Math.random();
+    const heart = i >= N_TEXT;
+    nSize[i] = heart ? 3.6 + Math.random() * 2.2 : 2.2 + Math.random() * 2.4;
+    const c = heart ? [1, 0.84, 0.9] : (Math.random() < 0.5 ? [1, 1, 1] : [0.78, 0.9, 1]);
+    nCol[i * 3] = c[0]; nCol[i * 3 + 1] = c[1]; nCol[i * 3 + 2] = c[2];
+  }
+  nameGeo.setAttribute('position', new THREE.BufferAttribute(nStart, 3));
+  nameGeo.setAttribute('aStart', new THREE.BufferAttribute(nStart, 3));
+  nameGeo.setAttribute('aTarget', new THREE.BufferAttribute(nTarget, 3));
+  nameGeo.setAttribute('aDelay', new THREE.BufferAttribute(nDelay, 1));
+  nameGeo.setAttribute('aSize', new THREE.BufferAttribute(nSize, 1));
+  nameGeo.setAttribute('aRand', new THREE.BufferAttribute(nRand, 1));
+  nameGeo.setAttribute('aColor', new THREE.BufferAttribute(nCol, 3));
+  const nameU = Object.assign({}, U, { uProg: { value: 0 }, uUp: { value: new THREE.Vector3(0, 1, 0) } });
+  const nameStars = new THREE.Points(nameGeo, new THREE.ShaderMaterial({
+    uniforms: nameU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `
+      attribute vec3 aStart; attribute vec3 aTarget; attribute float aDelay; attribute float aSize; attribute float aRand; attribute vec3 aColor;
+      uniform float uProg, uTime, uNight, uPR; uniform vec3 uUp;
+      varying float vA; varying vec3 vC;
+      void main(){
+        float k = clamp((uProg - aDelay)/0.3, 0.0, 1.0);
+        float e = k < 0.5 ? 4.0*k*k*k : 1.0 - pow(-2.0*k + 2.0, 3.0)/2.0;
+        float arc = sin(e*3.14159);
+        // rise out of the box in a widening spiral, then sweep up to its place in the sky
+        float rise = smoothstep(0.0, 0.25, k);
+        vec3 p = mix(aStart, aTarget, e) + uUp*arc*70.0;
+        float sa = e*11.0 + aRand*6.2831 + uTime*0.6;
+        p += vec3(cos(sa), 0.0, sin(sa)) * (0.25 + arc*arc*45.0) * rise * (1.0 - e*e);
+        p.y += rise * (1.0 - e) * (0.6 + aRand*1.2);
+        p += vec3(sin(uTime*0.7 + aRand*30.0), cos(uTime*0.6 + aRand*17.0), 0.0)*1.4*e;
+        float tw = 0.65 + 0.35*sin(uTime*(1.5 + aRand*2.5) + aRand*50.0);
+        vA = uNight * smoothstep(0.0, 0.03, k) * mix(0.9, 0.8 + 0.2*tw, e);
+        vC = aColor;
+        gl_Position = projectionMatrix*modelViewMatrix*vec4(p, 1.0);
+        gl_PointSize = aSize*uPR*(1.0 + arc*1.4 + e*0.25);
+      }`,
+    fragmentShader: STAR_FS
+  }));
+  nameStars.renderOrder = 2; nameStars.frustumCulled = false; nameStars.position.copy(CAM);
+  scene.add(nameStars);
+
+  function sampleName() {
+    const font = '700 220px "Dancing Script", "Segoe Script", cursive';
+    const m = document.createElement('canvas').getContext('2d');
+    m.font = font;
+    const tw = Math.ceil(m.measureText(CONFIG.name).width) || 600;
+    const W = tw + 120, H = 340;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const g = cv.getContext('2d');
+    g.font = font; g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(CONFIG.name, W / 2, H / 2);
+    const data = g.getImageData(0, 0, W, H).data, pts = [];
+    for (let y = 0; y < H; y += 3) for (let x = 0; x < W; x += 3) if (data[(y * W + x) * 4 + 3] > 140) pts.push([x, y]);
+    for (let i = pts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pts[i], pts[j]] = [pts[j], pts[i]]; }
+    let minY = H, maxY = 0;
+    pts.forEach(p => { minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]); });
+    const midY = (minY + maxY) / 2, halfH = (maxY - minY) / 2 / tw;
+    for (let i = 0; i < N_TEXT; i++) {
+      const p = pts.length ? pts[i % pts.length] : [W / 2, H / 2];
+      const jx = (Math.random() - 0.5) * 2.5, jy = (Math.random() - 0.5) * 2.5;
+      local[i * 2] = (p[0] + jx - W / 2) / tw;
+      local[i * 2 + 1] = -(p[1] + jy - midY) / tw;
+      nDelay[i] = ((p[0] - 60) / tw) * 0.45 + Math.random() * 0.12;
+    }
+    const hs = 0.075, hy = halfH + 0.06 + hs;
+    for (let j = 0; j < N_HEART; j++) {
+      const t = (j / N_HEART) * Math.PI * 2, i = N_TEXT + j;
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+      local[i * 2] = (x / 17) * hs + (Math.random() - 0.5) * 0.004;
+      local[i * 2 + 1] = hy + (y / 17) * hs + (Math.random() - 0.5) * 0.004;
+      nDelay[i] = 0.62 + (j / N_HEART) * 0.12;
+    }
+    nameGeo.attributes.aDelay.needsUpdate = true;
+    layoutName();
+  }
+
+  function layoutName() {
+    const el = NAME_EL, D = NAME_D;
+    const cx = 0, cy = Math.sin(el) * D, cz = -Math.cos(el) * D;
+    const ux = 0, uy = Math.cos(el), uz = Math.sin(el);
+    const vw = 2 * D * Math.tan(camera.fov * Math.PI / 360) * camera.aspect;
+    const W = Math.min(vw * 0.82, D * 0.95);
+    for (let i = 0; i < NN; i++) {
+      const lx = local[i * 2] * W, ly = local[i * 2 + 1] * W;
+      nTarget[i * 3] = cx + lx + ux * ly;
+      nTarget[i * 3 + 1] = cy + uy * ly;
+      nTarget[i * 3 + 2] = cz + uz * ly;
+    }
+    nameU.uUp.value.set(ux, uy, uz);
+    nameGeo.attributes.aTarget.needsUpdate = true;
+  }
+
+  /* ---------- Shooting stars ---------- */
+  const M = 3, TR = 28;
+  const mPos = new Float32Array(M * TR * 3), mA = new Float32Array(M * TR), mS = new Float32Array(M * TR), mC = new Float32Array(M * TR * 3).fill(1);
+  const meteorGeo = new THREE.BufferGeometry();
+  meteorGeo.setAttribute('position', new THREE.BufferAttribute(mPos, 3));
+  meteorGeo.setAttribute('aAlpha', new THREE.BufferAttribute(mA, 1));
+  meteorGeo.setAttribute('aSize', new THREE.BufferAttribute(mS, 1));
+  meteorGeo.setAttribute('aColor', new THREE.BufferAttribute(mC, 3));
+  const meteorPts = new THREE.Points(meteorGeo, new THREE.ShaderMaterial({
+    uniforms: U, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `
+      attribute float aAlpha; attribute float aSize; attribute vec3 aColor; uniform float uPR;
+      varying float vA; varying vec3 vC;
+      void main(){ vA = aAlpha; vC = aColor; gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0); gl_PointSize = aSize*uPR; }`,
+    fragmentShader: STAR_FS
+  }));
+  meteorPts.renderOrder = 3; meteorPts.frustumCulled = false; meteorPts.position.copy(CAM);
+  scene.add(meteorPts);
+  const meteors = Array.from({ length: M }, () => ({ on: false, t: 0, life: 1, head: new THREE.Vector3(), vel: new THREE.Vector3() }));
+  let nextMeteor = 3;
+  function spawnMeteor() {
+    const m = meteors.find(x => !x.on); if (!m) return;
+    const a = view.yaw + (Math.random() - 0.5) * 1.3, el = 0.45 + Math.random() * 0.6, R = 1300;
+    m.head.set(-Math.sin(a) * Math.cos(el) * R, Math.sin(el) * R, -Math.cos(a) * Math.cos(el) * R);
+    const side = Math.random() < 0.5 ? -1 : 1;
+    m.vel.set(Math.cos(a) * side, -0.55, -Math.sin(a) * side).normalize().multiplyScalar(650 + Math.random() * 300);
+    m.t = 0; m.life = 0.9 + Math.random() * 0.5; m.on = true;
+  }
+  const tmpV = new THREE.Vector3(), dirV = new THREE.Vector3();
+  function updateMeteors(dt) {
+    meteors.forEach((m, k) => {
+      if (m.on) { m.t += dt; m.head.addScaledVector(m.vel, dt); if (m.t > m.life) m.on = false; }
+      const env = m.on ? Math.sin(Math.PI * m.t / m.life) : 0;
+      dirV.copy(m.vel).normalize();
+      for (let i = 0; i < TR; i++) {
+        const j = k * TR + i, f = 1 - i / TR;
+        tmpV.copy(m.head).addScaledVector(dirV, -i * 9);
+        mPos[j * 3] = tmpV.x; mPos[j * 3 + 1] = tmpV.y; mPos[j * 3 + 2] = tmpV.z;
+        mA[j] = env * Math.pow(f, 1.6) * U.uNight.value;
+        mS[j] = 1.5 + f * 5;
+      }
+    });
+    meteorGeo.attributes.position.needsUpdate = true;
+    meteorGeo.attributes.aAlpha.needsUpdate = true;
+    meteorGeo.attributes.aSize.needsUpdate = true;
+  }
+
+  /* ---------- Gift box: wrapped, ribboned, lit; arrow + ground chevrons lead the way ---------- */
+  const BW = 0.5, BH = 0.4, BD = 0.5;
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x1b2a12, 0.9);
+  const sunL = new THREE.DirectionalLight(0xffffff, 1);
+  const moonL = new THREE.DirectionalLight(0x9fb4e8, 0);
+  moonL.position.copy(U.uMoonDir.value).multiplyScalar(50);
+  scene.add(hemi, sunL, moonL);
+
+  function radialTex(stops) {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d'), grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    stops.forEach(s => grd.addColorStop(s[0], s[1]));
+    g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  }
+  function paperTex() {
+    const c = document.createElement('canvas'); c.width = c.height = 512;
+    const g = c.getContext('2d');
+    const grd = g.createLinearGradient(0, 0, 512, 512);
+    grd.addColorStop(0, '#3f8fd6'); grd.addColorStop(1, '#5aaae8');
+    g.fillStyle = grd; g.fillRect(0, 0, 512, 512);
+    const img = g.getImageData(0, 0, 512, 512), d = img.data;
+    for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * 12; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+    g.putImageData(img, 0, 0);
+    const star = (x, y, r) => {
+      g.beginPath();
+      for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.45 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+      g.closePath(); g.fill();
+    };
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+      const cx = x * 64 + (y % 2 ? 32 : 0) + 16, cy = y * 64 + 20;
+      g.fillStyle = 'rgba(255,255,255,0.88)'; star(cx % 512, cy, 9);
+      g.fillStyle = 'rgba(220,240,255,0.55)';
+      g.beginPath(); g.arc((cx + 30) % 512, cy + 30, 3, 0, Math.PI * 2); g.fill();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return t;
+  }
+
+  const gift = new THREE.Group();
+  gift.position.copy(BOX);
+  gift.visible = false;
+  scene.add(gift);
+  const box = new THREE.Group();
+  gift.add(box);
+
+  const paperMat = new THREE.MeshStandardMaterial({ map: paperTex(), roughness: 0.55, metalness: 0.05 });
+  const ribbonMat = new THREE.MeshStandardMaterial({ color: 0xf3f7ff, roughness: 0.28, metalness: 0.25, emissive: 0x2a4a70, emissiveIntensity: 0.25 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(BW, BH, BD), paperMat);
+  body.position.y = BH / 2; box.add(body);
+  const rb1 = new THREE.Mesh(new THREE.BoxGeometry(0.085, BH + 0.004, BD + 0.008), ribbonMat); rb1.position.y = BH / 2;
+  const rb2 = new THREE.Mesh(new THREE.BoxGeometry(BW + 0.008, BH + 0.004, 0.085), ribbonMat); rb2.position.y = BH / 2;
+  box.add(rb1, rb2);
+
+  // light pouring out of the open box
+  const innerGlow = new THREE.Mesh(new THREE.PlaneGeometry(BW - 0.02, BD - 0.02), new THREE.MeshBasicMaterial({
+    color: 0xdff3ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  innerGlow.rotation.x = -Math.PI / 2; innerGlow.position.y = BH + 0.004; box.add(innerGlow);
+
+  const lid = new THREE.Group();
+  lid.position.y = BH; box.add(lid);
+  const lidMesh = new THREE.Mesh(new THREE.BoxGeometry(BW + 0.04, 0.1, BD + 0.04), paperMat);
+  lidMesh.position.y = 0.05; lid.add(lidMesh);
+  const lr1 = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.104, BD + 0.048), ribbonMat); lr1.position.y = 0.05;
+  const lr2 = new THREE.Mesh(new THREE.BoxGeometry(BW + 0.048, 0.104, 0.085), ribbonMat); lr2.position.y = 0.05;
+  lid.add(lr1, lr2);
+  // bow: two flattened satin loops, a knot and two tails
+  const loopGeo = new THREE.TorusGeometry(0.075, 0.011, 12, 40);
+  [-1, 1].forEach(s => {
+    const lp = new THREE.Mesh(loopGeo, ribbonMat);
+    lp.scale.set(1.25, 0.75, 3.2);
+    lp.position.set(s * 0.085, 0.16, 0);
+    lp.rotation.set(0, s * 0.35, s * -0.38);
+    lid.add(lp);
+    const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.05, 0.17), new THREE.MeshStandardMaterial({ color: 0xf3f7ff, roughness: 0.3, metalness: 0.2, side: THREE.DoubleSide }));
+    tail.position.set(s * 0.05, 0.1, 0.07);
+    tail.rotation.set(-1.15, 0, s * 0.45);
+    lid.add(tail);
+  });
+  const knot = new THREE.Mesh(new THREE.SphereGeometry(0.032, 20, 14), ribbonMat);
+  knot.scale.set(1.1, 0.8, 1.3); knot.position.y = 0.125; lid.add(knot);
+
+  // soft contact shadow on the ground
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), new THREE.MeshBasicMaterial({
+    map: radialTex([[0, 'rgba(0,0,0,0.55)'], [0.45, 'rgba(0,0,0,0.3)'], [1, 'rgba(0,0,0,0)']]), transparent: true, depthWrite: false }));
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.015; gift.add(shadow);
+
+  const giftL = new THREE.PointLight(0xbfe3ff, 0, 7, 2);
+  giftL.position.set(0, BH + 0.25, 0); gift.add(giftL);
+  const glowTex = radialTex([[0, 'rgba(255,255,255,1)'], [0.2, 'rgba(200,232,255,0.6)'], [0.5, 'rgba(120,180,255,0.15)'], [1, 'rgba(0,0,0,0)']]);
+  const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x9fd4ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  aura.position.y = BH * 0.6; aura.scale.setScalar(1.6); gift.add(aura);
+  const burstGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xe6f4ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  burstGlow.position.y = BH + 0.2; gift.add(burstGlow);
+
+  // column of light rising from the box
+  const beamU = { uI: { value: 0 }, uTime: U.uTime };
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.34, 9, 40, 1, true), new THREE.ShaderMaterial({
+    uniforms: beamU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    vertexShader: `varying float vH; varying vec3 vNv; varying float vA;
+      void main(){ vH = (position.y + 4.5)/9.0; vNv = normalize(normalMatrix*normal); vA = atan(position.z, position.x);
+        gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader: `uniform float uI, uTime; varying float vH; varying vec3 vNv; varying float vA;
+      void main(){
+        float f = abs(vNv.z); f = f*f;
+        float streak = 0.75 + 0.25*sin(vA*7.0 + vH*12.0 - uTime*3.0);
+        float a = pow(1.0 - vH, 1.6) * f * streak * uI;
+        gl_FragColor = vec4(vec3(0.82, 0.92, 1.0), a);
+      }`
+  }));
+  beam.position.y = BH + 4.5; gift.add(beam);
+
+  // floating arrow over the box
+  const arrow = new THREE.Group();
+  const arrowMat = new THREE.MeshBasicMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0 });
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.22, 4), arrowMat);
+  head.rotation.x = Math.PI; arrow.add(head);
+  const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.2, 0.06), arrowMat);
+  shaft.position.y = 0.2; arrow.add(shaft);
+  const arrowGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x8fd0ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  arrowGlow.scale.setScalar(0.9); arrowGlow.position.y = 0.08; arrow.add(arrowGlow);
+  gift.add(arrow);
+
+  // glowing chevrons above the grass, pulsing toward the box
+  const chevShape = new THREE.Shape();
+  [[-0.32, -0.1], [0, 0.2], [0.32, -0.1], [0.32, -0.22], [0, 0.08], [-0.32, -0.22]].forEach((p, i) => i ? chevShape.lineTo(p[0], p[1]) : chevShape.moveTo(p[0], p[1]));
+  const chevGeo = new THREE.ShapeGeometry(chevShape);
+  chevGeo.rotateX(-Math.PI / 2);
+  const chevrons = [];
+  [-2.6, -3.5, -4.4, -5.3].forEach(z => {
+    const m = new THREE.Mesh(chevGeo, new THREE.MeshBasicMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    m.position.set(0, groundH(0, z) + 0.42, z);
+    m.rotation.x = 0.35;
+    scene.add(m); chevrons.push(m);
+  });
+
+  // sparkle burst (CPU-simulated)
+  const SPN = 320;
+  const spPos = new Float32Array(SPN * 3), spVel = new Float32Array(SPN * 3), spLife = new Float32Array(SPN);
+  const spA = new Float32Array(SPN), spS = new Float32Array(SPN), spC = new Float32Array(SPN * 3);
+  for (let i = 0; i < SPN; i++) {
+    const c = Math.random() < 0.25 ? [1, 0.88, 0.94] : Math.random() < 0.5 ? [1, 1, 1] : [0.7, 0.88, 1];
+    spC[i * 3] = c[0]; spC[i * 3 + 1] = c[1]; spC[i * 3 + 2] = c[2];
+  }
+  const spGeo = new THREE.BufferGeometry();
+  spGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
+  spGeo.setAttribute('aAlpha', new THREE.BufferAttribute(spA, 1));
+  spGeo.setAttribute('aSize', new THREE.BufferAttribute(spS, 1));
+  spGeo.setAttribute('aColor', new THREE.BufferAttribute(spC, 3));
+  const sparks = new THREE.Points(spGeo, meteorPts.material);
+  sparks.renderOrder = 3; sparks.frustumCulled = false;
+  scene.add(sparks);
+  function burst(n, speed, up) {
+    let made = 0;
+    for (let i = 0; i < SPN && made < n; i++) {
+      if (spLife[i] > 0) continue;
+      const a = Math.random() * Math.PI * 2, r = Math.random() * 0.2;
+      spPos[i * 3] = BOX.x + Math.cos(a) * r; spPos[i * 3 + 1] = BOX.y + BH + 0.05; spPos[i * 3 + 2] = BOX.z + Math.sin(a) * r;
+      const s = speed * (0.4 + Math.random() * 0.8);
+      spVel[i * 3] = Math.cos(a) * s * 0.6; spVel[i * 3 + 1] = up * (0.6 + Math.random()); spVel[i * 3 + 2] = Math.sin(a) * s * 0.6;
+      spLife[i] = 1.2 + Math.random() * 1.6; spS[i] = 2 + Math.random() * 4;
+      made++;
+    }
+  }
+  function updateSparks(dt) {
+    for (let i = 0; i < SPN; i++) {
+      if (spLife[i] <= 0) { spA[i] = 0; continue; }
+      spLife[i] -= dt;
+      spVel[i * 3 + 1] -= 0.9 * dt;
+      spVel[i * 3] *= 0.985; spVel[i * 3 + 2] *= 0.985;
+      spPos[i * 3] += spVel[i * 3] * dt; spPos[i * 3 + 1] += spVel[i * 3 + 1] * dt; spPos[i * 3 + 2] += spVel[i * 3 + 2] * dt;
+      spA[i] = Math.min(1, spLife[i]) * (0.6 + 0.4 * Math.sin(time * 20 + i));
+    }
+    spGeo.attributes.position.needsUpdate = true;
+    spGeo.attributes.aAlpha.needsUpdate = true;
+    spGeo.attributes.aSize.needsUpdate = true;
+  }
+
+  const LID_START = new THREE.Vector3(0, BH, 0);
+  const lidVel = new THREE.Vector3();
+  let lidFlying = false, lidLanded = false;
+  const easeOutBack = x => 1 + 2.4 * Math.pow(x - 1, 3) + 1.4 * Math.pow(x - 1, 2);
+  function resetGift() {
+    gift.visible = false; box.scale.setScalar(1); box.rotation.set(0, 0, 0);
+    lid.position.copy(LID_START); lid.rotation.set(0, 0, 0);
+    lidFlying = false; lidLanded = false;
+    innerGlow.material.opacity = 0; burstGlow.material.opacity = 0; aura.material.opacity = 0;
+    beamU.uI.value = 0; giftL.intensity = 0; arrowMat.opacity = 0; arrowGlow.material.opacity = 0;
+    chevrons.forEach(c => { c.material.opacity = 0; });
+    spLife.fill(0);
+  }
+
+  /* ---------- Sky palette keyed to sun height ---------- */
+  const KEYS = [
+    { y: -0.35, zen: '#050f26', hor: '#17305c', sun: '#1a2550', lit: '#3a4b74', shade: '#111a36', mt: '#0d1838', fog: '#152a52', night: 1, warm: 0, cover: 0.3 },
+    { y: -0.14, zen: '#10255a', hor: '#3e5a9c', sun: '#7a6fc4', lit: '#56649e', shade: '#232f5c', mt: '#1c2850', fog: '#2c3f74', night: 0.55, warm: 0.25, cover: 0.42 },
+    { y: -0.02, zen: '#2a4d8f', hor: '#f6a487', sun: '#ff8a5c', lit: '#ffab8f', shade: '#5c5c8e', mt: '#46507e', fog: '#b48e9e', night: 0, warm: 1, cover: 0.5 },
+    { y: 0.10, zen: '#3f82cc', hor: '#f2d6b8', sun: '#ffcf8f', lit: '#fff0dc', shade: '#9aa8c6', mt: '#6a82aa', fog: '#d9d4cf', night: 0, warm: 0.45, cover: 0.55 },
+    { y: 0.35, zen: '#2f86e0', hor: '#bfe5fb', sun: '#fff6e2', lit: '#ffffff', shade: '#a9c3dc', mt: '#7097bf', fog: '#c9e4f6', night: 0, warm: 0, cover: 0.55 }
+  ];
+  const MAP = { zen: 'uZen', hor: 'uHor', sun: 'uSun', lit: 'uLit', shade: 'uShade', mt: 'uMount', fog: 'uFog' };
+  KEYS.forEach(k => { k.c = {}; for (const n in MAP) k.c[n] = new THREE.Color(k[n]); });
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const moon = new THREE.Color(0.05, 0.075, 0.15), moonCol = new THREE.Color(0.5, 0.6, 0.88);
+  function applySky(sy) {
+    let i = 0; while (i < KEYS.length - 2 && sy > KEYS[i + 1].y) i++;
+    const a = KEYS[i], b = KEYS[i + 1];
+    let t = Math.min(1, Math.max(0, (sy - a.y) / (b.y - a.y))); t = t * t * (3 - 2 * t);
+    for (const n in MAP) U[MAP[n]].value.copy(a.c[n]).lerp(b.c[n], t);
+    U.uNight.value = lerp(a.night, b.night, t);
+    U.uWarm.value = lerp(a.warm, b.warm, t);
+    U.uCover.value = lerp(a.cover, b.cover, t);
+    U.uSunLight.value.copy(U.uSun.value).multiplyScalar(smooth(-0.04, 0.22, sy) * 1.05);
+    U.uAmb.value.copy(U.uZen.value).lerp(U.uHor.value, 0.5).multiplyScalar(0.55);
+    const nt = U.uNight.value, sunAmt = smooth(-0.04, 0.22, sy);
+    U.uLight.value.copy(U.uSunLight.value).add(moonCol.clone().multiplyScalar(nt * 0.55));
+    U.uLightDir.value.copy(U.uSunDir.value).multiplyScalar(sunAmt + 0.001).addScaledVector(U.uMoonDir.value, nt * 0.6).normalize();
+    U.uAmb.value.r += moon.r * U.uNight.value; U.uAmb.value.g += moon.g * U.uNight.value; U.uAmb.value.b += moon.b * U.uNight.value;
+  }
+  const SUN_AZ = 0.25;
+  const sunYAt = T => 0.42 + (-0.4 - 0.42) * smooth(16, 50, T);
+
+  /* ---------- Post-processing: bloom, highlight roll-off, grade, vignette, grain, lens blur ---------- */
+  const hasPost = !!(THREE.EffectComposer && THREE.RenderPass && THREE.ShaderPass && THREE.UnrealBloomPass);
+  let composer = null, bloom = null, finalPass = null;
+  if (hasPost) {
+    composer = new THREE.EffectComposer(renderer);
+    composer.setPixelRatio(PR);
+    composer.addPass(new THREE.RenderPass(scene, camera));
+    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.4, 0.5, 0.85);
+    composer.addPass(bloom);
+    finalPass = new THREE.ShaderPass({
+      uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uVig: { value: 0.85 }, uGrain: { value: 0.03 }, uBlur: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0); }',
+      fragmentShader: `
+        uniform sampler2D tDiffuse; uniform float uTime, uVig, uGrain, uBlur; uniform vec2 uRes;
+        varying vec2 vUv;
+        void main(){
+          vec2 uv = vUv;
+          vec3 c = texture2D(tDiffuse, uv).rgb;
+          if (uBlur > 0.001) {
+            float r = smoothstep(0.16, 0.6, length((uv - vec2(0.5, 0.4))*vec2(uRes.x/uRes.y, 1.0)*0.9)) * uBlur;
+            if (r > 0.001) {
+              vec3 acc = c;
+              for (int i = 0; i < 12; i++) {
+                float a = float(i)*2.39996, rr = sqrt(float(i) + 0.5)/3.5;
+                acc += texture2D(tDiffuse, uv + vec2(cos(a), sin(a))*rr*r*11.0/uRes).rgb;
+              }
+              c = acc/13.0;
+            }
+          }
+          vec3 x = max(c - 0.85, 0.0);
+          c = min(c, 0.85) + x/(1.0 + x*2.0);
+          float l = dot(c, vec3(0.299, 0.587, 0.114));
+          c = mix(vec3(l), c, 1.07);
+          c = c*c*(3.0 - 2.0*c)*0.22 + c*0.78;
+          vec2 v = (uv - 0.5)*vec2(1.0, 0.9);
+          c *= clamp(1.0 - dot(v, v)*uVig, 0.0, 1.0);
+          float g = fract(sin(dot(uv*uRes + fract(uTime)*vec2(91.7, 37.3), vec2(12.9898, 78.233)))*43758.5453) - 0.5;
+          c += g*uGrain;
+          gl_FragColor = vec4(c, 1.0);
+        }`
+    });
+    composer.addPass(finalPass);
+  }
+  // adaptive quality: if frames are slow, drop bloom first, then resolution
+  let perfAcc = 0, perfN = 0, perfLevel = 0;
+  function watchPerf(dt) {
+    if (perfLevel >= 2) return;
+    perfAcc += dt; perfN++;
+    if (perfAcc < 3) return;
+    const avg = perfAcc / perfN; perfAcc = 0; perfN = 0;
+    if (avg > 1 / 26) {
+      perfLevel++;
+      if (perfLevel === 1 && bloom) bloom.enabled = false;
+      else { renderer.setPixelRatio(1); if (composer) composer.setPixelRatio(1); resize(); }
+    }
+  }
+
+  /* ---------- Resize ---------- */
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.fov = w < h ? 72 : 58;
+    camera.updateProjectionMatrix();
+    const pr = renderer.getPixelRatio();
+    U.uScale.value = h * pr / (2 * Math.tan(camera.fov * Math.PI / 360));
+    if (composer) { composer.setSize(w, h); finalPass.uniforms.uRes.value.set(w * pr, h * pr); }
+    layoutName();
+  }
+  addEventListener('resize', resize);
+  resize();
+  sampleName();
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('700 220px "Dancing Script"', CONFIG.name).then(sampleName).catch(() => {});
+  }
+
+  /* ---------- Story text ---------- */
+  const storyEl = document.getElementById('story'), hintEl = document.getElementById('hint');
+  let hideTimer = 0, hintTimer = 0;
+  function showLine(text, sub, dur) {
+    clearTimeout(hideTimer);
+    storyEl.innerHTML = '';
+    const p = document.createElement('p'); p.className = 'line';
+    let n = 0;
+    text.replace('{name}', CONFIG.name).split(' ').forEach((word, wi, arr) => {
+      const w = document.createElement('span'); w.className = 'w';
+      Array.from(word).forEach(ch => {
+        const s = document.createElement('span'); s.className = 'ch'; s.textContent = ch;
+        s.style.animationDelay = (n++ * 0.045) + 's'; w.appendChild(s);
+      });
+      p.appendChild(w);
+      if (wi < arr.length - 1) p.appendChild(document.createTextNode(' '));
+    });
+    storyEl.appendChild(p);
+    if (sub) {
+      const s = document.createElement('p'); s.className = 'sub fade'; s.textContent = sub;
+      s.style.animationDelay = (n * 0.045 + 0.4) + 's'; storyEl.appendChild(s);
+    }
+    storyEl.classList.remove('out');
+    if (dur !== Infinity) hideTimer = setTimeout(() => storyEl.classList.add('out'), dur * 1000);
+  }
+  function showHint(text, ms) {
+    clearTimeout(hintTimer);
+    hintEl.textContent = text; hintEl.classList.add('show');
+    hintTimer = setTimeout(() => hintEl.classList.remove('show'), ms);
+  }
+
+  /* ---------- Gentle generative music + wind ---------- */
+  let actx = null, master = null, bus = null, soundOn = true, schedTimer = 0, nextNote = 0, step = 0;
+  const CHORDS = [[60, 64, 67, 71], [57, 60, 64, 67], [53, 57, 60, 64], [55, 59, 62, 67]];
+  const PATTERN = [0, 2, 1, 3, 2, 1, 3, 2];
+  const EIGHTH = 60 / 70 / 2;
+  function note(midi, t, vel, len) {
+    const f = 440 * Math.pow(2, (midi - 69) / 12);
+    const o1 = actx.createOscillator(), o2 = actx.createOscillator(), g = actx.createGain(), g2 = actx.createGain();
+    o1.type = 'sine'; o1.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f * 2; g2.gain.value = 0.12;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vel, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(bus);
+    o1.start(t); o2.start(t); o1.stop(t + len + 0.05); o2.stop(t + len + 0.05);
+  }
+  function schedule() {
+    while (nextNote < actx.currentTime + 0.3) {
+      const chord = CHORDS[Math.floor(step / 8) % 4], i = step % 8;
+      if (i === 0) { note(chord[0] - 12, nextNote, 0.22, 3.2); note(chord[0] - 24, nextNote, 0.12, 3.2); }
+      if (i === 0 || Math.random() > 0.15) note(chord[PATTERN[i]] + 12, nextNote, 0.09 + Math.random() * 0.05, 1.8);
+      if (i === 4 && Math.random() < 0.35) note([79, 81, 84, 86, 88][Math.floor(Math.random() * 5)], nextNote + EIGHTH * 0.5, 0.05, 2.2);
+      nextNote += EIGHTH; step++;
+    }
+  }
+  // Bài hát chính (nhac.mp3) tải bằng fetch và phát qua Web Audio; nếu lỗi thì dùng nhạc piano tự tạo
+  let useSong = true, songBuf = null, songSrc = null;
+  const songData = fetch('nhac.mp3').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); });
+  songData.catch(() => {});
+  function decodeSong(ab) {
+    return new Promise((res, rej) => {
+      const p = actx.decodeAudioData(ab, res, rej);
+      if (p && p.then) p.then(res, rej);
+    });
+  }
+  function playSong() {
+    if (!songBuf || !actx) return;
+    if (songSrc) { try { songSrc.stop(); } catch (e) {} }
+    songSrc = actx.createBufferSource(); songSrc.buffer = songBuf; songSrc.loop = true;
+    const g = actx.createGain(); g.gain.value = 0.9;
+    songSrc.connect(g); g.connect(master);
+    songSrc.start();
+  }
+  function startAudio() {
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain(); master.gain.setValueAtTime(0.0001, actx.currentTime); master.connect(actx.destination);
+      master.gain.exponentialRampToValueAtTime(0.9, actx.currentTime + 3);
+      const delay = actx.createDelay(); delay.delayTime.value = 0.34;
+      const fb = actx.createGain(); fb.gain.value = 0.38;
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
+      const wet = actx.createGain(); wet.gain.value = 0.35;
+      delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(wet); wet.connect(master);
+      bus = actx.createGain(); bus.gain.value = 0.55; bus.connect(master); bus.connect(delay);
+      const len = actx.sampleRate * 2, buf = actx.createBuffer(1, len, actx.sampleRate), ch = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
+      noiseBuf = buf;
+      const src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+      const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 480; bp.Q.value = 0.6;
+      const wg = actx.createGain(); wg.gain.value = 0.02;
+      const lfo = actx.createOscillator(), lg = actx.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 0.025;
+      lfo.connect(lg); lg.connect(wg.gain); src.connect(bp); bp.connect(wg); wg.connect(master);
+      src.start(); lfo.start();
+      startAmbience();
+    } catch (e) { actx = null; return; }
+    songData.then(decodeSong)
+      .then(b => { songBuf = b; playSong(); })
+      .catch(() => { useSong = false; startPiano(); });
+  }
+  /* ---------- Ambience & sound effects (all synthesized) ---------- */
+  let noiseBuf = null, amb = null;
+  function impulse(sec, decay) {
+    const len = Math.floor(actx.sampleRate * sec), b = actx.createBuffer(2, len, actx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
+    return b;
+  }
+  function panned(dest, pan, vol) {
+    const g = actx.createGain(); g.gain.value = vol;
+    if (actx.createStereoPanner) { const p = actx.createStereoPanner(); p.pan.value = pan; g.connect(p); p.connect(dest); }
+    else g.connect(dest);
+    return g;
+  }
+  function startAmbience() {
+    const rev = actx.createConvolver(); rev.buffer = impulse(2.8, 3);
+    const revG = actx.createGain(); revG.gain.value = 0.45; rev.connect(revG); revG.connect(master);
+    const day = actx.createGain(); day.gain.value = 0; day.connect(master); day.connect(rev);
+    const night = actx.createGain(); night.gain.value = 0; night.connect(master);
+    const sfx = actx.createGain(); sfx.gain.value = 0.85; sfx.connect(master); sfx.connect(rev);
+    // grass rustle: bright filtered noise swelling with the gusts
+    const rs = actx.createBufferSource(); rs.buffer = noiseBuf; rs.loop = true;
+    const hp = actx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2200;
+    const rg = actx.createGain(); rg.gain.value = 0;
+    rs.connect(hp); hp.connect(rg); rg.connect(master); rs.start();
+    amb = { day, night, sfx, rg, nextBird: 1.5, nextCricket: 0, tick: 0 };
+  }
+  function bird() {
+    const out = panned(amb.day, Math.random() * 1.6 - 0.8, 0.12 + Math.random() * 0.16);
+    const base = 2600 + Math.random() * 1800, up = Math.random() < 0.5, n = 2 + Math.floor(Math.random() * 5);
+    let t = actx.currentTime + 0.05;
+    for (let i = 0; i < n; i++) {
+      const d = 0.05 + Math.random() * 0.08, f1 = base * (0.9 + Math.random() * 0.25), f2 = up ? f1 * 1.35 : f1 * 0.72;
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + d);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.6, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + d + 0.02);
+      t += d + 0.03 + Math.random() * 0.09;
+    }
+  }
+  function cricket() {
+    const out = panned(amb.night, Math.random() * 1.8 - 0.9, 0.05 + Math.random() * 0.07);
+    const f = 4100 + Math.random() * 900, pulses = 2 + Math.floor(Math.random() * 3), t0 = actx.currentTime + 0.02;
+    for (let p = 0; p < pulses; p++) {
+      const t = t0 + p * 0.034, o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.7, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.026);
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.04);
+    }
+  }
+  function noiseHit(t, freq, q, vol, dur, dest) {
+    const s = actx.createBufferSource(); s.buffer = noiseBuf;
+    const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(dest); s.start(t, Math.random() * 1.5); s.stop(t + dur + 0.05);
+  }
+  function bell(midi, t, vol, dest) {
+    const f = 440 * Math.pow(2, (midi - 69) / 12);
+    [[1, 1, 2.6], [2.76, 0.4, 1.3], [5.4, 0.2, 0.6]].forEach(([r, a, d]) => {
+      const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f * r;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol * a, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + 0.05);
+    });
+  }
+  const SFX = {
+    step() { if (!amb) return; const t = actx.currentTime; noiseHit(t, 700 + Math.random() * 500, 0.9, 0.28, 0.2, amb.sfx); noiseHit(t + 0.03, 3200, 1.5, 0.08, 0.12, amb.sfx); },
+    sparkle() { if (!amb) return; const t = actx.currentTime; for (let i = 0; i < 6; i++) bell(91 + [0, 3, 5, 7, 10, 12][Math.floor(Math.random() * 6)], t + i * 0.07 + Math.random() * 0.03, 0.05, amb.sfx); },
+    chime() { if (!amb) return; const t = actx.currentTime; [72, 76, 79, 84, 88, 91, 96].forEach((m, i) => bell(m, t + i * 0.085, 0.12, amb.sfx)); },
+    whoosh(dur) {
+      if (!amb) return;
+      const t = actx.currentTime, s = actx.createBufferSource(); s.buffer = noiseBuf; s.loop = true;
+      const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.4;
+      f.frequency.setValueAtTime(250, t); f.frequency.exponentialRampToValueAtTime(3200, t + dur);
+      const g = actx.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.22, t + dur * 0.35); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f); f.connect(g); g.connect(amb.sfx); s.start(t); s.stop(t + dur + 0.1);
+    },
+    thud() {
+      if (!amb) return;
+      const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(60, t + 0.15);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o.connect(g); g.connect(amb.sfx); o.start(t); o.stop(t + 0.3);
+      noiseHit(t, 900, 0.8, 0.15, 0.2, amb.sfx);
+    }
+  };
+  function updateAmbience(dt) {
+    if (!amb || !actx || actx.state !== 'running') return;
+    const n = U.uNight.value;
+    amb.tick -= dt;
+    if (amb.tick <= 0) {
+      amb.tick = 0.2;
+      const t = actx.currentTime;
+      amb.day.gain.setTargetAtTime((1 - n) * 0.9, t, 0.8);
+      amb.night.gain.setTargetAtTime(n * 0.9, t, 0.8);
+      const gust = 0.5 + 0.5 * Math.sin(time * 0.9) * Math.sin(time * 0.37 + 1.3);
+      amb.rg.gain.setTargetAtTime(0.004 + 0.018 * gust, t, 0.4);
+    }
+    amb.nextBird -= dt;
+    if (amb.nextBird <= 0) { if (n < 0.6) bird(); amb.nextBird = 1.2 + Math.random() * 4; }
+    amb.nextCricket -= dt;
+    if (amb.nextCricket <= 0) { if (n > 0.3) cricket(); amb.nextCricket = 0.12 + Math.random() * 0.45; }
+  }
+
+  function startPiano() {
+    if (schedTimer) return;
+    nextNote = actx.currentTime + 0.2;
+    schedTimer = setInterval(schedule, 60);
+  }
+  function setSound(on) {
+    soundOn = on;
+    document.getElementById('icoOn').hidden = !on;
+    document.getElementById('icoOff').hidden = on;
+    document.getElementById('soundBtn').setAttribute('aria-label', on ? 'Tắt âm thanh' : 'Bật âm thanh');
+    if (!actx) return;
+    if (on) actx.resume(); else actx.suspend();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!actx) return;
+    if (document.hidden) actx.suspend(); else if (soundOn) actx.resume();
+  });
+
+  /* ---------- Story state & input ---------- */
+  let started = false, T = 0, storyIdx = 0, wishIdx = 0, time = 0;
+  const view = { yaw: 0, pitch: 0.08, yawOff: 0, pitchOff: 0 };
+  let drag = null, lastInput = -99;
+
+  function begin() {
+    if (started) return;
+    started = true; T = 0;
+    document.getElementById('intro').classList.add('hide');
+    document.getElementById('controls').hidden = false;
+    startAudio();
+    if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {});
+    setTimeout(() => showHint('Kéo để ngắm xung quanh', 5000), 1200);
+  }
+  /* ---------- Night gift sequence: appear → walk to it → open → stars rise ---------- */
+  let lastStep = -1, gstate = 'idle', gT = 0, openT = 0, saidLook = false, gGlow = 0;
+  const giftColor = new THREE.Color(0xbfe3ff);
+  function setGState(s) { gstate = s; gT = 0; }
+  function startWalk() {
+    setGState('walking'); lastStep = -1;
+    hintEl.classList.remove('show'); storyEl.classList.add('out');
+    view.yawOff = 0; view.pitchOff = 0;
+  }
+  function startOpen() {
+    setGState('opening'); openT = 0;
+    hintEl.classList.remove('show'); storyEl.classList.add('out');
+    view.yawOff = 0; view.pitchOff = 0;
+  }
+  function updateGift(dt) {
+    gT += dt;
+    if (gstate === 'idle') {
+      if (started && T >= 43) {
+        setGState('appear'); gift.visible = true; box.scale.setScalar(0.001);
+        burst(70, 0.9, 0.9); SFX.sparkle();
+        showLine(CONFIG.giftAppear, null, Infinity);
+      }
+    } else if (gstate === 'appear') {
+      box.scale.setScalar(Math.max(0.001, easeOutBack(Math.min(1, gT / 1.2))));
+      if (gT > 1.6) { setGState('waitWalk'); showHint('Chạm vào màn hình để đi tới hộp quà', 600000); }
+    } else if (gstate === 'walking') {
+      const st = Math.floor(gT / 0.42);
+      if (st !== lastStep && gT < 3.6) { lastStep = st; SFX.step(); }
+      if (gT >= 3.8) { setGState('waitOpen'); showLine(CONFIG.giftOpen, null, Infinity); showHint('Chạm vào hộp quà để mở', 600000); }
+    } else if (gstate === 'waitOpen') {
+      const c = gT % 2.6, k = c < 0.5 ? 1 - c / 0.5 : 0;
+      box.rotation.z = Math.sin(c * 38) * 0.05 * k;
+      box.position.y = Math.abs(Math.sin(c * 12)) * 0.03 * k;
+    } else if (gstate === 'opening' || gstate === 'done') {
+      openT += dt;
+      const o = openT;
+      if (o < 0.8) {
+        const k = o / 0.8;
+        box.rotation.z = Math.sin(o * 45) * 0.05 * k;
+        box.position.y = 0;
+        lid.position.y = BH + Math.abs(Math.sin(o * 28)) * 0.025 * k;
+        innerGlow.material.opacity = 0.35 * k;
+      } else {
+        box.rotation.z *= 0.85;
+        if (!lidFlying && !lidLanded) { lidFlying = true; lidVel.set(0.3, 2.8, -1.1); burst(240, 1.7, 2.7); SFX.chime(); SFX.whoosh(5); }
+        if (lidFlying) {
+          lidVel.y -= 6.5 * dt;
+          lid.position.addScaledVector(lidVel, dt);
+          lid.rotation.x -= 3.2 * dt; lid.rotation.z += 0.8 * dt;
+          const gy = groundH(BOX.x + lid.position.x, BOX.z + lid.position.z) - BOX.y + 0.04;
+          if (lid.position.y <= gy && lidVel.y < 0) {
+            lid.position.y = gy; lidFlying = false; lidLanded = true; SFX.thud();
+            lid.rotation.set(-Math.PI * 0.94, 0, 0.3);
+          }
+        }
+        const b = o - 0.8;
+        innerGlow.material.opacity = Math.min(1, 0.35 + b * 1.5);
+        burstGlow.material.opacity = Math.min(1, b * 3) * (0.5 + 0.5 * Math.exp(-b * 1.2));
+        burstGlow.scale.setScalar(1.2 + 2.8 * Math.exp(-b * 0.8));
+        beamU.uI.value = Math.min(1, b * 2) * 0.8 * Math.exp(-b * 0.32);
+        if (b < 10 && Math.random() < dt * 25) burst(2, 0.5, 1.4);
+      }
+      if (!saidLook && o > 2.6) { saidLook = true; showLine(CONFIG.lookUp, null, 5); }
+      if (gstate === 'opening' && o > 11.8) {
+        gstate = 'done';
+        showLine(CONFIG.finale.text, CONFIG.finale.sub, Infinity);
+        setTimeout(() => { if (gstate === 'done') showHint('Chạm vào bầu trời để nhận thêm lời chúc ✨', 8000); }, 4000);
+      }
+    }
+
+    // glow of the gift: a soft magic shimmer while waiting, a flash when it opens
+    if (gstate === 'idle') gGlow = 0;
+    else if (gstate === 'opening' || gstate === 'done') {
+      gGlow = openT < 0.8 ? 0.5 + openT : 1.1 + 2.6 * Math.exp(-(openT - 0.8) * 0.5);
+    } else gGlow = Math.min(1, gT * 0.8 + (gstate === 'appear' ? 0 : 1)) * (0.5 + 0.12 * Math.sin(time * 2.2));
+    giftL.intensity = Math.min(gGlow, 1.4) * 1.1;
+    U.uGiftCol.value.copy(giftColor).multiplyScalar(gGlow * 0.55);
+    aura.material.opacity = Math.min(1, gGlow) * 0.45;
+
+    // guidance: floating arrow over the box, chevrons on the way to it
+    const showArrow = gstate === 'waitWalk' || gstate === 'waitOpen';
+    arrowMat.opacity += ((showArrow ? 0.95 : 0) - arrowMat.opacity) * Math.min(1, dt * 3);
+    arrowGlow.material.opacity = arrowMat.opacity * 0.6;
+    arrow.visible = arrowMat.opacity > 0.01;
+    arrow.position.y = BH + 0.6 + Math.sin(time * 3) * 0.07;
+    arrow.rotation.y += dt * 1.4;
+    chevrons.forEach((c, i) => {
+      const target = gstate === 'waitWalk' ? 0.15 + 0.75 * Math.pow(0.5 + 0.5 * Math.sin(time * 4 - i * 1.3), 3) : 0;
+      c.material.opacity += (target - c.material.opacity) * Math.min(1, dt * 5);
+      c.visible = c.material.opacity > 0.01;
+    });
+    updateSparks(dt);
+  }
+
+  function replay() {
+    T = 0; storyIdx = 0; nextMeteor = 3;
+    gstate = 'idle'; gT = 0; openT = 0; saidLook = false; gGlow = 0;
+    resetGift();
+    meteors.forEach(m => { m.on = false; });
+    storyEl.classList.add('out'); hintEl.classList.remove('show');
+    view.yawOff = 0; view.pitchOff = 0;
+    if (useSong) playSong();
+  }
+  document.getElementById('startBtn').addEventListener('click', begin);
+  document.getElementById('replayBtn').addEventListener('click', replay);
+  document.getElementById('soundBtn').addEventListener('click', () => setSound(!soundOn));
+
+  canvas.addEventListener('pointerdown', e => {
+    drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false };
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    drag.x = e.clientX; drag.y = e.clientY;
+    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) drag.moved = true;
+    view.yawOff += dx * 0.0035; view.pitchOff += dy * 0.003;
+    lastInput = time;
+  });
+  const endDrag = e => {
+    if (drag && !drag.moved && e.type === 'pointerup') onTap(e.clientX, e.clientY);
+    drag = null;
+  };
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+
+  function onTap(x, y) {
+    if (!started) return;
+    if (gstate === 'waitWalk') { startWalk(); return; }
+    if (gstate === 'waitOpen') { startOpen(); return; }
+    if (gstate !== 'done') return;
+    let caught = false;
+    for (const m of meteors) {
+      if (!m.on) continue;
+      tmpV.copy(m.head).add(CAM0).project(camera);
+      const sx = (tmpV.x * 0.5 + 0.5) * innerWidth, sy = (-tmpV.y * 0.5 + 0.5) * innerHeight;
+      if (tmpV.z < 1 && Math.hypot(sx - x, sy - y) < 90) { caught = true; m.on = false; break; }
+    }
+    const w = CONFIG.wishes[wishIdx++ % CONFIG.wishes.length];
+    if (caught) showLine('Em vừa bắt được một ngôi sao băng', 'Điều ước: ' + w + ' ✨', 6);
+    else showLine(w, null, 5.5);
+  }
+
+  /* ---------- Loop ---------- */
+  const clock = new THREE.Clock();
+  function loop() {
+    requestAnimationFrame(loop);
+    const dt = Math.min(clock.getDelta(), 0.1);
+    time += dt; U.uTime.value = time;
+    if (started) T += dt;
+
+    const sy = started ? sunYAt(T) : 0.42;
+    const el = Math.asin(Math.max(-1, Math.min(1, sy)));
+    U.uSunDir.value.set(Math.sin(SUN_AZ) * Math.cos(el), sy, -Math.cos(SUN_AZ) * Math.cos(el)).normalize();
+    applySky(sy);
+
+    updateGift(dt);
+
+    // camera: story drives position and base view, dragging adds an offset that drifts back when idle
+    let basePitch = 0.08;
+    if (gstate === 'appear' || gstate === 'waitWalk') basePitch = -0.16;
+    else if (gstate === 'walking') basePitch = lerp(-0.16, -0.4, smooth(0, 3.8, gT));
+    else if (gstate === 'waitOpen') basePitch = -0.4;
+    else if (gstate === 'opening' || gstate === 'done') basePitch = lerp(-0.4, NAME_EL - 0.03, smooth(1.6, 7.5, openT));
+    const wk = gstate === 'walking' ? smooth(0, 3.8, gT) : (gstate === 'waitOpen' || gstate === 'opening' || gstate === 'done') ? 1 : 0;
+    const cx = lerp(CAM0.x, STAND.x, wk), cz = lerp(CAM0.z, STAND.z, wk);
+    const bob = gstate === 'walking' ? Math.sin(gT * 7.5) * 0.03 * Math.sin(Math.PI * wk) : 0;
+    CAM.set(cx, groundH(cx, cz) + lerp(1.5, 1.2, wk) + bob, cz);
+    camera.position.copy(CAM);
+
+    hemi.color.copy(U.uZen.value).lerp(U.uHor.value, 0.5);
+    sunL.color.copy(U.uSunLight.value);
+    sunL.position.copy(U.uSunDir.value).multiplyScalar(50);
+    moonL.intensity = 0.8 * U.uNight.value;
+
+    if (time - lastInput > 5 && !drag) {
+      const k = Math.exp(-dt * 0.7);
+      view.yawOff *= k; view.pitchOff *= k;
+    }
+    const tp = Math.max(-0.7, Math.min(1.35, basePitch + view.pitchOff));
+    view.pitchOff = tp - basePitch;
+    const ty = view.yawOff + Math.sin(time * 0.15) * 0.01;
+    const s = Math.min(1, dt * 6);
+    view.yaw += (ty - view.yaw) * s;
+    view.pitch += (tp + Math.sin(time * 0.2) * 0.006 - view.pitch) * s;
+    camera.rotation.y = view.yaw; camera.rotation.x = view.pitch;
+
+    nameU.uProg.value = (gstate === 'opening' || gstate === 'done') ? Math.max(0, (openT - 1.1) / 9) : 0;
+
+    if (started) {
+      while (storyIdx < CONFIG.story.length && T >= CONFIG.story[storyIdx].at) {
+        const st = CONFIG.story[storyIdx++];
+        showLine(st.text, st.sub, st.dur);
+      }
+      if (U.uNight.value > 0.7) { nextMeteor -= dt; if (nextMeteor <= 0) { spawnMeteor(); nextMeteor = 2.5 + Math.random() * 5; } }
+    }
+    updateMeteors(dt);
+    updateAmbience(dt);
+
+    sky.position.copy(CAM); clouds.position.copy(CAM);
+    if (composer) {
+      const nt = U.uNight.value;
+      bloom.strength = lerp(0.16, 1.05, nt);
+      bloom.threshold = lerp(0.94, 0.5, nt);
+      bloom.radius = lerp(0.45, 0.6, nt);
+      finalPass.uniforms.uTime.value = time;
+      const blurT = (gstate === 'waitOpen' ? 1 : gstate === 'walking' ? smooth(2.4, 3.8, gT) : gstate === 'opening' ? 1 - smooth(1.4, 3.5, openT) : 0) * (isMobile ? 0.7 : 1);
+      finalPass.uniforms.uBlur.value += (blurT - finalPass.uniforms.uBlur.value) * Math.min(1, dt * 3);
+      composer.render(dt);
+    } else renderer.render(scene, camera);
+    if (started) watchPerf(dt);
+  }
+  loop();
+})();
+</script>
