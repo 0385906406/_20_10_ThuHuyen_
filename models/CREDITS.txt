@@ -1,0 +1,5 @@
+hand-left.glb, hand-right.glb
+  "generic-hand" models from WebXR Input Profiles (Immersive Web Community Group, W3C)
+  https://github.com/immersive-web/webxr-input-profiles
+  Licence: W3C Software and Document License
+  https://www.w3.org/Consortium/Legal/copyright-software

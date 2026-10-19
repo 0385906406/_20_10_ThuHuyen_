@@ -23,4 +23,14 @@ const head = `<!doctype html>
 `;
 fs.writeFileSync(path.join(out, 'index.html'), head + page + '\n</body>\n</html>\n');
 fs.copyFileSync(path.join(__dirname, 'nhac.mp3'), path.join(out, 'nhac.mp3'));
+const photos = path.join(__dirname, 'anh');
+if (fs.existsSync(photos)) {
+  fs.mkdirSync(path.join(out, 'anh'), { recursive: true });
+  for (const f of fs.readdirSync(photos)) fs.copyFileSync(path.join(photos, f), path.join(out, 'anh', f));
+}
+const models = path.join(__dirname, 'models');
+if (fs.existsSync(models)) {
+  fs.mkdirSync(path.join(out, 'models'), { recursive: true });
+  for (const f of fs.readdirSync(models)) fs.copyFileSync(path.join(models, f), path.join(out, 'models', f));
+}
 console.log('Đã đóng gói vào', out);
